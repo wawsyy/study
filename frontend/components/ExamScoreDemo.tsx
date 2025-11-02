@@ -26,6 +26,8 @@ export const ExamScoreDemo = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 5;
 
   // Real-time validation
   const inputError = scoreInput ? validateScore(scoreInput) : null;
@@ -301,6 +303,27 @@ export const ExamScoreDemo = () => {
             <p className="text-sm text-blue-800">{examScore.message}</p>
           </div>
         )}
+      </div>
+
+      {/* Pagination */}
+      <div className={cardClass}>
+        <div className="flex justify-between items-center">
+          <button
+            className={buttonClass + " px-4 py-2"}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span className="text-gray-600">Page {currentPage}</span>
+          <button
+            className={buttonClass + " px-4 py-2"}
+            onClick={() => setCurrentPage(prev => prev + 1)}
+            disabled={currentPage >= Math.ceil((examScore.scoreCount || 0) / itemsPerPage)}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
     </div>
