@@ -26,6 +26,9 @@ export const ExamScoreDemo = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
+  // Real-time validation
+  const inputError = scoreInput ? validateScore(scoreInput) : null;
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -96,14 +99,33 @@ export const ExamScoreDemo = () => {
     return errorNotDeployed(chainId);
   }
 
+  const validateScore = (value: string): string | null => {
+    if (!value.trim()) {
+      return "Score is required";
+    }
+
+    const score = parseInt(value);
+    if (isNaN(score)) {
+      return "Please enter a valid number";
+    }
+
+    if (score < 0 || score > 100) {
+      return "Score must be between 0 and 100";
+    }
+
+    return null;
+  };
+
   const handleSubmit = () => {
     setErrorMessage("");
 
-    const score = parseInt(scoreInput);
-    if (isNaN(score) || score < 0 || score > 100) {
-      setErrorMessage("Please enter a valid score between 0 and 100");
+    const validationError = validateScore(scoreInput);
+    if (validationError) {
+      setErrorMessage(validationError);
       return;
     }
+
+    const score = parseInt(scoreInput);
 
     try {
       examScore.submitScore(score);
@@ -148,7 +170,11 @@ export const ExamScoreDemo = () => {
             value={scoreInput}
             onChange={(e) => setScoreInput(e.target.value)}
             placeholder="Enter score (0-100)"
-            className="flex-1 px-4 py-3 rounded-lg border-2 border-purple-300 focus:border-purple-500 focus:outline-none text-lg"
+            className={`flex-1 px-4 py-3 rounded-lg border-2 focus:outline-none text-lg transition-colors ${
+              inputError
+                ? "border-red-300 focus:border-red-500"
+                : "border-purple-300 focus:border-purple-500"
+            }`}
             disabled={!examScore.canSubmit || examScore.isSubmitting}
           />
           <div className="text-xs text-gray-500 mt-1 hidden sm:block">
