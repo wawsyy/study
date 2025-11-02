@@ -23,6 +23,7 @@ export const ExamScoreDemo = () => {
   } = useRainbowWallet();
 
   const [scoreInput, setScoreInput] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const {
     instance: fhevmInstance,
@@ -77,13 +78,20 @@ export const ExamScoreDemo = () => {
   }
 
   const handleSubmit = () => {
+    setErrorMessage("");
+
     const score = parseInt(scoreInput);
     if (isNaN(score) || score < 0 || score > 100) {
-      alert("Please enter a valid score between 0 and 100");
+      setErrorMessage("Please enter a valid score between 0 and 100");
       return;
     }
-    examScore.submitScore(score);
-    setScoreInput("");
+
+    try {
+      examScore.submitScore(score);
+      setScoreInput("");
+    } catch (error) {
+      setErrorMessage("Failed to submit score. Please try again.");
+    }
   };
 
   return (
@@ -122,6 +130,11 @@ export const ExamScoreDemo = () => {
         </div>
         {examScore.isSubmitting && (
           <p className="mt-2 text-sm text-purple-600">{examScore.message}</p>
+        )}
+        {errorMessage && (
+          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-800">{errorMessage}</p>
+          </div>
         )}
       </div>
 
