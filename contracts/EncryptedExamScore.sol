@@ -8,16 +8,40 @@ import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 /// @notice A system for users to store and retrieve their encrypted exam scores privately
 /// @dev Uses FHE to encrypt scores so the platform cannot analyze or use them for recommendations
 contract EncryptedExamScore is SepoliaConfig {
+    // Owner of the contract
+    address public owner;
+
     // Mapping from user address to their encrypted score
     mapping(address => euint32) private userScores;
 
     // Mapping from user address to score count (for tracking multiple scores)
     mapping(address => uint256) public scoreCount;
 
+    // Emergency pause functionality
+    bool public paused;
+
     // Events
     event ScoreSubmitted(address indexed user, uint256 indexed scoreIndex);
     event ScoreUpdated(address indexed user, uint256 indexed scoreIndex);
     event ScoreDeleted(address indexed user);
+    event Paused(address indexed account);
+    event Unpaused(address indexed user);
+
+    // Modifiers
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
+        _;
+    }
+
+    modifier whenNotPaused() {
+        require(!paused, "Contract is paused");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+        paused = false;
+    }
 
     /// @notice Submit an encrypted exam score
     /// @param encryptedScore The encrypted score value
@@ -25,7 +49,7 @@ contract EncryptedExamScore is SepoliaConfig {
     function submitScore(
         externalEuint32 encryptedScore,
         bytes calldata inputProof
-    ) external {
+    ) external whenNotPaused {
         // Convert external encrypted input to internal encrypted type
         euint32 score = FHE.fromExternal(encryptedScore, inputProof);
 
@@ -48,7 +72,7 @@ contract EncryptedExamScore is SepoliaConfig {
     function updateScore(
         externalEuint32 encryptedScore,
         bytes calldata inputProof
-    ) external {
+    ) external whenNotPaused {
         require(scoreCount[msg.sender] > 0, "No score exists to update");
 
         // Convert external encrypted input to internal encrypted type
@@ -82,7 +106,7 @@ contract EncryptedExamScore is SepoliaConfig {
     function submitBatchScores(
         externalEuint32[] calldata encryptedScores,
         bytes[] calldata inputProofs
-    ) external {
+    ) external whenNotPaused {
         require(encryptedScores.length == inputProofs.length, "Mismatched input lengths");
         require(encryptedScores.length > 0, "No scores provided");
         require(encryptedScores.length <= 10, "Too many scores in batch");
@@ -106,7 +130,7 @@ contract EncryptedExamScore is SepoliaConfig {
     }
 
     /// @notice Delete the user's encrypted exam score
-    function deleteMyScore() external {
+    function deleteMyScore() external whenNotPaused {
         require(scoreCount[msg.sender] > 0, "No score exists to delete");
 
         // Clear the encrypted score
@@ -116,6 +140,25 @@ contract EncryptedExamScore is SepoliaConfig {
         scoreCount[msg.sender] = 0;
 
         emit ScoreDeleted(msg.sender);
+    }
+
+    /// @notice Pause all contract operations (emergency stop)
+    function pause() external onlyOwner {
+        paused = true;
+        emit Paused(msg.sender);
+    }
+
+    /// @notice Resume contract operations
+    function unpause() external onlyOwner {
+        paused = false;
+        emit Unpaused(msg.sender);
+    }
+
+    /// @notice Transfer ownership to a new address
+    /// @param newOwner The address of the new owner
+    function transferOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "New owner cannot be zero address");
+        owner = newOwner;
     }
 }
 
