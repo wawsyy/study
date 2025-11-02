@@ -24,6 +24,7 @@ export const ExamScoreDemo = () => {
 
   const [scoreInput, setScoreInput] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -116,12 +117,23 @@ export const ExamScoreDemo = () => {
     <div className="grid w-full gap-4 md:gap-6 max-w-4xl mx-auto px-4 md:px-6">
       {/* Header */}
       <div className={cardClass}>
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          Encrypted Exam Score Log
-        </h1>
-        <p className="text-gray-600">
-          Track your exam scores privately. Your scores are encrypted and only you can decrypt them.
-        </p>
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              Encrypted Exam Score Log
+            </h1>
+            <p className="text-gray-600">
+              Track your exam scores privately. Your scores are encrypted and only you can decrypt them.
+            </p>
+          </div>
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {isDarkMode ? "☀️" : "🌙"}
+          </button>
+        </div>
       </div>
 
       {/* Submit Score Section */}
