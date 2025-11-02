@@ -17,6 +17,7 @@ contract EncryptedExamScore is SepoliaConfig {
     // Events
     event ScoreSubmitted(address indexed user, uint256 indexed scoreIndex);
     event ScoreUpdated(address indexed user, uint256 indexed scoreIndex);
+    event ScoreDeleted(address indexed user);
 
     /// @notice Submit an encrypted exam score
     /// @param encryptedScore The encrypted score value
@@ -102,6 +103,19 @@ contract EncryptedExamScore is SepoliaConfig {
 
             emit ScoreSubmitted(msg.sender, scoreCount[msg.sender] - 1);
         }
+    }
+
+    /// @notice Delete the user's encrypted exam score
+    function deleteMyScore() external {
+        require(scoreCount[msg.sender] > 0, "No score exists to delete");
+
+        // Clear the encrypted score
+        delete userScores[msg.sender];
+
+        // Reset score count
+        scoreCount[msg.sender] = 0;
+
+        emit ScoreDeleted(msg.sender);
     }
 }
 
