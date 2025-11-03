@@ -76,7 +76,7 @@ export const ExamScoreDemo = () => {
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 " +
     "disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed";
 
-  const cardClass = "rounded-xl bg-white/95 backdrop-blur-sm border-2 border-purple-200 shadow-xl hover:shadow-2xl transition-shadow duration-300 p-6";
+  const cardClass = "rounded-xl bg-white/95 backdrop-blur-sm border-2 border-purple-200 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 p-6";
 
   if (!isConnected) {
     return (
