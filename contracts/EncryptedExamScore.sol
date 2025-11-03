@@ -36,6 +36,16 @@ contract EncryptedExamScore is SepoliaConfig {
     uint256 public constant TIME_LOCK_DURATION = 1 days;
     mapping(bytes32 => uint256) public timeLockedActions;
 
+    // Audit logging
+    struct AuditLog {
+        address user;
+        string action;
+        uint256 timestamp;
+        bytes32 actionId;
+    }
+
+    AuditLog[] public auditLogs;
+
     // Events
     event ScoreSubmitted(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
     event ScoreUpdated(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
@@ -81,6 +91,7 @@ contract EncryptedExamScore is SepoliaConfig {
         FHE.allowThis(score);
         FHE.allow(score, msg.sender); // Only the user can decrypt their own score
 
+        _logAuditEvent("SCORE_SUBMITTED", keccak256(abi.encodePacked(msg.sender, scoreCount[msg.sender] - 1)));
         emit ScoreSubmitted(msg.sender, scoreCount[msg.sender] - 1, block.timestamp);
     }
 
@@ -249,6 +260,41 @@ contract EncryptedExamScore is SepoliaConfig {
             return 0;
         }
         return unlockTime - block.timestamp;
+    }
+
+    /// @notice Log audit event
+    /// @param action Description of the action performed
+    /// @param actionId Unique identifier for the action
+    function _logAuditEvent(string memory action, bytes32 actionId) internal {
+        auditLogs.push(AuditLog({
+            user: msg.sender,
+            action: action,
+            timestamp: block.timestamp,
+            actionId: actionId
+        }));
+    }
+
+    /// @notice Get total number of audit logs
+    /// @return Number of audit log entries
+    function getAuditLogCount() external view returns (uint256) {
+        return auditLogs.length;
+    }
+
+    /// @notice Get audit log entry by index
+    /// @param index Index of the audit log entry
+    /// @return user Address that performed the action
+    /// @return action Description of the action
+    /// @return timestamp When the action was performed
+    /// @return actionId Unique identifier for the action
+    function getAuditLog(uint256 index) external view returns (
+        address user,
+        string memory action,
+        uint256 timestamp,
+        bytes32 actionId
+    ) {
+        require(index < auditLogs.length, "Index out of bounds");
+        AuditLog memory log = auditLogs[index];
+        return (log.user, log.action, log.timestamp, log.actionId);
     }
 }
 
