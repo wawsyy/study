@@ -362,5 +362,76 @@ contract EncryptedExamScore is SepoliaConfig {
 
         return (healthy, totalScores, paused);
     }
+
+    /// @notice Get filtered audit logs by user
+    /// @param user Address to filter logs for
+    /// @param startIndex Starting index for pagination
+    /// @param maxResults Maximum number of results to return
+    /// @return filteredLogs Array of matching audit logs
+    /// @return totalCount Total number of matching logs
+    function getAuditLogsByUser(
+        address user,
+        uint256 startIndex,
+        uint256 maxResults
+    ) external view returns (
+        AuditLog[] memory filteredLogs,
+        uint256 totalCount
+    ) {
+        uint256 count = 0;
+
+        // First pass: count matching logs
+        for (uint256 i = 0; i < auditLogs.length; i++) {
+            if (auditLogs[i].user == user) {
+                count++;
+            }
+        }
+
+        totalCount = count;
+
+        // Second pass: collect filtered logs
+        uint256 resultCount = 0;
+        uint256 endIndex = startIndex + maxResults;
+        if (endIndex > count) endIndex = count;
+
+        filteredLogs = new AuditLog[](endIndex - startIndex);
+
+        count = 0; // Reset counter
+        for (uint256 i = 0; i < auditLogs.length && resultCount < (endIndex - startIndex); i++) {
+            if (auditLogs[i].user == user) {
+                if (count >= startIndex) {
+                    filteredLogs[resultCount] = auditLogs[i];
+                    resultCount++;
+                }
+                count++;
+            }
+        }
+
+        return (filteredLogs, totalCount);
+    }
+
+    /// @notice Get audit logs by action type
+    /// @param action Action string to filter by
+    /// @return filteredLogs Array of matching audit logs
+    function getAuditLogsByAction(string calldata action) external view returns (AuditLog[] memory filteredLogs) {
+        // First pass: count matches
+        uint256 count = 0;
+        for (uint256 i = 0; i < auditLogs.length; i++) {
+            if (keccak256(bytes(auditLogs[i].action)) == keccak256(bytes(action))) {
+                count++;
+            }
+        }
+
+        // Second pass: collect results
+        filteredLogs = new AuditLog[](count);
+        uint256 resultIndex = 0;
+        for (uint256 i = 0; i < auditLogs.length; i++) {
+            if (keccak256(bytes(auditLogs[i].action)) == keccak256(bytes(action))) {
+                filteredLogs[resultIndex] = auditLogs[i];
+                resultIndex++;
+            }
+        }
+
+        return filteredLogs;
+    }
 }
 
