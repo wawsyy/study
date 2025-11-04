@@ -32,6 +32,10 @@ contract EncryptedExamScore is SepoliaConfig {
     mapping(bytes32 => uint256) public emergencyApprovals;
     mapping(bytes32 => mapping(address => bool)) public hasApproved;
 
+    // Time lock for critical operations
+    uint256 public constant TIME_LOCK_DURATION = 1 days;
+    mapping(bytes32 => uint256) public timeLockedActions;
+
     // Events
     event ScoreSubmitted(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
     event ScoreUpdated(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
@@ -211,6 +215,40 @@ contract EncryptedExamScore is SepoliaConfig {
     /// @return Number of approvals received
     function getEmergencyApprovalCount(bytes32 actionId) external view returns (uint256) {
         return emergencyApprovals[actionId];
+    }
+
+    /// @notice Initiate time-locked ownership transfer
+    /// @param newOwner The address of the new owner
+    function initiateOwnershipTransfer(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "New owner cannot be zero address");
+
+        bytes32 actionId = keccak256(abi.encodePacked("OWNERSHIP_TRANSFER", newOwner));
+        timeLockedActions[actionId] = block.timestamp + TIME_LOCK_DURATION;
+    }
+
+    /// @notice Execute time-locked ownership transfer
+    /// @param newOwner The address of the new owner
+    function executeOwnershipTransfer(address newOwner) external onlyOwner {
+        bytes32 actionId = keccak256(abi.encodePacked("OWNERSHIP_TRANSFER", newOwner));
+        require(timeLockedActions[actionId] > 0, "Transfer not initiated");
+        require(block.timestamp >= timeLockedActions[actionId], "Time lock not expired");
+
+        address oldOwner = owner;
+        owner = newOwner;
+        delete timeLockedActions[actionId];
+
+        emit OwnershipTransferred(oldOwner, newOwner, block.timestamp);
+    }
+
+    /// @notice Get remaining time lock for an action
+    /// @param actionId Unique identifier for the action
+    /// @return Remaining time in seconds (0 if not locked or expired)
+    function getTimeLockRemaining(bytes32 actionId) external view returns (uint256) {
+        uint256 unlockTime = timeLockedActions[actionId];
+        if (unlockTime == 0 || block.timestamp >= unlockTime) {
+            return 0;
+        }
+        return unlockTime - block.timestamp;
     }
 }
 
