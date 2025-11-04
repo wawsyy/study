@@ -234,6 +234,26 @@ export const ExamScoreDemo = () => {
         <div className="flex gap-4">
           <button
             className={buttonClass + " flex-1"}
+            onClick={() => {
+              const data = {
+                scoreCount: examScore.scoreCount,
+                lastUpdated: new Date().toISOString(),
+                handle: examScore.handle
+              };
+              const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'exam-score-data.json';
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            disabled={!examScore.canGetScore}
+          >
+            Export Data
+          </button>
+          <button
+            className={buttonClass + " flex-1"}
             disabled={!examScore.canGetScore}
             onClick={examScore.refreshScore}
           >
