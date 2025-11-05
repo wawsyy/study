@@ -161,6 +161,29 @@ export const ExamScoreDemo = () => {
         </div>
       </div>
 
+      {/* Statistics Section */}
+      <div className={cardClass}>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Statistics</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-blue-50 rounded-lg p-4 text-center">
+            <p className="text-2xl font-bold text-blue-700">{examScore.scoreCount || 0}</p>
+            <p className="text-sm text-blue-600">Total Scores</p>
+          </div>
+          <div className="bg-green-50 rounded-lg p-4 text-center">
+            <p className="text-2xl font-bold text-green-700">{examScore.isDecrypted ? '1' : '0'}</p>
+            <p className="text-sm text-green-600">Decrypted</p>
+          </div>
+          <div className="bg-purple-50 rounded-lg p-4 text-center">
+            <p className="text-2xl font-bold text-purple-700">{examScore.message ? 'Active' : 'Idle'}</p>
+            <p className="text-sm text-purple-600">Status</p>
+          </div>
+          <div className="bg-orange-50 rounded-lg p-4 text-center">
+            <p className="text-2xl font-bold text-orange-700">{new Date().getFullYear()}</p>
+            <p className="text-sm text-orange-600">Year</p>
+          </div>
+        </div>
+      </div>
+
       {/* Search Section */}
       <div className={cardClass}>
         <h2 className="text-xl font-bold text-gray-800 mb-4">Search & Filter</h2>
