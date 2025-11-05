@@ -121,11 +121,18 @@ export const ExamScoreDemo = () => {
             disabled={!examScore.canSubmit || examScore.isSubmitting}
           />
           <button
-            className={buttonClass + " w-full sm:w-auto sm:flex-shrink-0"}
+            className={buttonClass + " w-full sm:w-auto sm:flex-shrink-0 relative"}
             disabled={!examScore.canSubmit || examScore.isSubmitting}
             onClick={handleSubmit}
           >
-            {examScore.isSubmitting ? "Submitting..." : "Submit Score"}
+            {examScore.isSubmitting && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+              </div>
+            )}
+            <span className={examScore.isSubmitting ? "opacity-0" : "opacity-100"}>
+              {examScore.isSubmitting ? "Submitting..." : "Submit Score"}
+            </span>
           </button>
         </div>
         {examScore.isSubmitting && (
