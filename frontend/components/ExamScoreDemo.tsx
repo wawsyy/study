@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFhevm } from "../fhevm/useFhevm";
 import { useInMemoryStorage } from "../hooks/useInMemoryStorage";
 import { useRainbowWallet } from "@/hooks/useRainbowWallet";
@@ -24,6 +24,24 @@ export const ExamScoreDemo = () => {
 
   const [scoreInput, setScoreInput] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + Enter to submit score
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && examScore.canSubmit && !examScore.isSubmitting) {
+        handleSubmit();
+      }
+      // Escape to clear input
+      if (e.key === 'Escape') {
+        setScoreInput("");
+        setErrorMessage("");
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [examScore.canSubmit, examScore.isSubmitting]);
 
   const {
     instance: fhevmInstance,
@@ -110,7 +128,8 @@ export const ExamScoreDemo = () => {
       <div className={cardClass}>
         <h2 className="text-xl font-bold text-gray-800 mb-4">Submit New Score</h2>
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <input
+          <div className="flex-1">
+            <input
             type="number"
             min="0"
             max="100"
@@ -120,6 +139,10 @@ export const ExamScoreDemo = () => {
             className="flex-1 px-4 py-3 rounded-lg border-2 border-purple-300 focus:border-purple-500 focus:outline-none text-lg"
             disabled={!examScore.canSubmit || examScore.isSubmitting}
           />
+          <div className="text-xs text-gray-500 mt-1 hidden sm:block">
+            Press Ctrl+Enter to submit
+          </div>
+          </div>
           <button
             className={buttonClass + " w-full sm:w-auto sm:flex-shrink-0 relative"}
             disabled={!examScore.canSubmit || examScore.isSubmitting}
