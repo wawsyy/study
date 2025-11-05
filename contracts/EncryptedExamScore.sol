@@ -21,11 +21,13 @@ contract EncryptedExamScore is SepoliaConfig {
     bool public paused;
 
     // Events
-    event ScoreSubmitted(address indexed user, uint256 indexed scoreIndex);
-    event ScoreUpdated(address indexed user, uint256 indexed scoreIndex);
-    event ScoreDeleted(address indexed user);
-    event Paused(address indexed account);
-    event Unpaused(address indexed user);
+    event ScoreSubmitted(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
+    event ScoreUpdated(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
+    event ScoreDeleted(address indexed user, uint256 timestamp);
+    event BatchScoresSubmitted(address indexed user, uint256 count, uint256 timestamp);
+    event Paused(address indexed account, uint256 timestamp);
+    event Unpaused(address indexed user, uint256 timestamp);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner, uint256 timestamp);
 
     // Modifiers
     modifier onlyOwner() {
@@ -63,7 +65,7 @@ contract EncryptedExamScore is SepoliaConfig {
         FHE.allowThis(score);
         FHE.allow(score, msg.sender); // Only the user can decrypt their own score
 
-        emit ScoreSubmitted(msg.sender, scoreCount[msg.sender] - 1);
+        emit ScoreSubmitted(msg.sender, scoreCount[msg.sender] - 1, block.timestamp);
     }
 
     /// @notice Update an existing encrypted exam score
@@ -85,7 +87,7 @@ contract EncryptedExamScore is SepoliaConfig {
         FHE.allowThis(score);
         FHE.allow(score, msg.sender);
 
-        emit ScoreUpdated(msg.sender, scoreCount[msg.sender] - 1);
+        emit ScoreUpdated(msg.sender, scoreCount[msg.sender] - 1, block.timestamp);
     }
 
     /// @notice Get encrypted score for the caller
@@ -125,8 +127,10 @@ contract EncryptedExamScore is SepoliaConfig {
             FHE.allowThis(score);
             FHE.allow(score, msg.sender);
 
-            emit ScoreSubmitted(msg.sender, scoreCount[msg.sender] - 1);
+            emit ScoreSubmitted(msg.sender, scoreCount[msg.sender] - 1, block.timestamp);
         }
+
+        emit BatchScoresSubmitted(msg.sender, encryptedScores.length, block.timestamp);
     }
 
     /// @notice Delete the user's encrypted exam score
@@ -139,26 +143,28 @@ contract EncryptedExamScore is SepoliaConfig {
         // Reset score count
         scoreCount[msg.sender] = 0;
 
-        emit ScoreDeleted(msg.sender);
+        emit ScoreDeleted(msg.sender, block.timestamp);
     }
 
     /// @notice Pause all contract operations (emergency stop)
     function pause() external onlyOwner {
         paused = true;
-        emit Paused(msg.sender);
+        emit Paused(msg.sender, block.timestamp);
     }
 
     /// @notice Resume contract operations
     function unpause() external onlyOwner {
         paused = false;
-        emit Unpaused(msg.sender);
+        emit Unpaused(msg.sender, block.timestamp);
     }
 
     /// @notice Transfer ownership to a new address
     /// @param newOwner The address of the new owner
     function transferOwnership(address newOwner) external onlyOwner {
         require(newOwner != address(0), "New owner cannot be zero address");
+        address oldOwner = owner;
         owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner, block.timestamp);
     }
 }
 
