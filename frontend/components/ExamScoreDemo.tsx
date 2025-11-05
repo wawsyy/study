@@ -176,6 +176,9 @@ export const ExamScoreDemo = () => {
                 : "border-purple-300 focus:border-purple-500"
             }`}
             disabled={!examScore.canSubmit || examScore.isSubmitting}
+            aria-label="Exam score input"
+            aria-describedby={inputError ? "score-error" : undefined}
+            aria-invalid={!!inputError}
           />
           <div className="text-xs text-gray-500 mt-1 hidden sm:block">
             Press Ctrl+Enter to submit
@@ -200,7 +203,7 @@ export const ExamScoreDemo = () => {
           <p className="mt-2 text-sm text-purple-600">{examScore.message}</p>
         )}
         {errorMessage && (
-          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg" role="alert" id="score-error">
             <p className="text-sm text-red-800">{errorMessage}</p>
           </div>
         )}
