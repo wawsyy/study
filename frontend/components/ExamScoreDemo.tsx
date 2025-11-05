@@ -25,6 +25,7 @@ export const ExamScoreDemo = () => {
   const [scoreInput, setScoreInput] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Real-time validation
   const inputError = scoreInput ? validateScore(scoreInput) : null;
@@ -154,6 +155,28 @@ export const ExamScoreDemo = () => {
             aria-label="Toggle theme"
           >
             {isDarkMode ? "☀️" : "🌙"}
+          </button>
+        </div>
+      </div>
+
+      {/* Search Section */}
+      <div className={cardClass}>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Search & Filter</h2>
+        <div className="flex gap-4">
+          <input
+            type="text"
+            placeholder="Search scores..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 px-4 py-3 rounded-lg border-2 border-purple-300 focus:border-purple-500 focus:outline-none text-lg"
+            aria-label="Search scores"
+          />
+          <button
+            className={buttonClass + " px-6"}
+            onClick={() => setSearchTerm("")}
+            disabled={!searchTerm}
+          >
+            Clear
           </button>
         </div>
       </div>
