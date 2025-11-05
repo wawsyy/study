@@ -11,6 +11,11 @@ contract EncryptedExamScore is SepoliaConfig {
     // Owner of the contract
     address public owner;
 
+    // Constants for gas optimization
+    uint256 private constant MAX_BATCH_SIZE = 10;
+    uint256 private constant MIN_SCORE = 0;
+    uint256 private constant MAX_SCORE = 100;
+
     // Mapping from user address to their encrypted score
     mapping(address => euint32) private userScores;
 
@@ -102,6 +107,14 @@ contract EncryptedExamScore is SepoliaConfig {
         return scoreCount[msg.sender];
     }
 
+    /// @notice Get contract constants for frontend validation
+    /// @return maxBatchSize Maximum number of scores in batch submission
+    /// @return minScore Minimum allowed score value
+    /// @return maxScore Maximum allowed score value
+    function getConstants() external pure returns (uint256 maxBatchSize, uint256 minScore, uint256 maxScore) {
+        return (MAX_BATCH_SIZE, MIN_SCORE, MAX_SCORE);
+    }
+
     /// @notice Submit multiple encrypted exam scores in batch
     /// @param encryptedScores Array of encrypted score values
     /// @param inputProofs Array of input proofs corresponding to each score
@@ -111,7 +124,7 @@ contract EncryptedExamScore is SepoliaConfig {
     ) external whenNotPaused {
         require(encryptedScores.length == inputProofs.length, "Mismatched input lengths");
         require(encryptedScores.length > 0, "No scores provided");
-        require(encryptedScores.length <= 10, "Too many scores in batch");
+        require(encryptedScores.length <= MAX_BATCH_SIZE, "Too many scores in batch");
 
         for (uint256 i = 0; i < encryptedScores.length; i++) {
             // Convert external encrypted input to internal encrypted type
