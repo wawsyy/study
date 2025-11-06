@@ -46,6 +46,10 @@ contract EncryptedExamScore is SepoliaConfig {
 
     AuditLog[] public auditLogs;
 
+    // Upgrade mechanism
+    address public implementation;
+    bool public upgradeEnabled;
+
     // Events
     event ScoreSubmitted(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
     event ScoreUpdated(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
@@ -295,6 +299,28 @@ contract EncryptedExamScore is SepoliaConfig {
         require(index < auditLogs.length, "Index out of bounds");
         AuditLog memory log = auditLogs[index];
         return (log.user, log.action, log.timestamp, log.actionId);
+    }
+
+    /// @notice Enable upgrade mechanism
+    function enableUpgrades() external onlyOwner {
+        upgradeEnabled = true;
+        _logAuditEvent("UPGRADES_ENABLED", keccak256(abi.encodePacked("UPGRADES_ENABLED", block.timestamp)));
+    }
+
+    /// @notice Set new implementation address (for upgrade pattern)
+    /// @param newImplementation Address of the new implementation
+    function setImplementation(address newImplementation) external onlyOwner {
+        require(upgradeEnabled, "Upgrades not enabled");
+        require(newImplementation != address(0), "Invalid implementation address");
+
+        implementation = newImplementation;
+        _logAuditEvent("IMPLEMENTATION_UPDATED", keccak256(abi.encodePacked("IMPLEMENTATION_UPDATED", newImplementation)));
+    }
+
+    /// @notice Get current implementation address
+    /// @return Address of the current implementation
+    function getImplementation() external view returns (address) {
+        return implementation != address(0) ? implementation : address(this);
     }
 }
 
