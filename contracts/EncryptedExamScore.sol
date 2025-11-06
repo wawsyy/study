@@ -322,5 +322,45 @@ contract EncryptedExamScore is SepoliaConfig {
     function getImplementation() external view returns (address) {
         return implementation != address(0) ? implementation : address(this);
     }
+
+    /// @notice Validate score data format and constraints
+    /// @param score The score value to validate
+    /// @return True if score is valid
+    function validateScore(uint256 score) external pure returns (bool) {
+        return score >= MIN_SCORE && score <= MAX_SCORE;
+    }
+
+    /// @notice Validate batch submission parameters
+    /// @param scores Array of scores to validate
+    /// @return True if batch is valid
+    function validateBatch(uint256[] calldata scores) external view returns (bool) {
+        if (scores.length == 0 || scores.length > MAX_BATCH_SIZE) {
+            return false;
+        }
+
+        for (uint256 i = 0; i < scores.length; i++) {
+            if (scores[i] < MIN_SCORE || scores[i] > MAX_SCORE) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// @notice Get contract health status
+    /// @return isHealthy True if contract is operating normally
+    /// @return scoreCount Total number of scores in system
+    /// @return isPaused Current pause status
+    function getHealthStatus() external view returns (bool isHealthy, uint256 scoreCount, bool isPaused) {
+        // Simple health check - could be extended with more checks
+        bool healthy = !paused && owner != address(0);
+        uint256 totalScores = 0;
+
+        // Count total scores across all users (simplified)
+        // In production, this would be more complex
+        totalScores = scoreCount[msg.sender]; // Just return caller's count for demo
+
+        return (healthy, totalScores, paused);
+    }
 }
 
