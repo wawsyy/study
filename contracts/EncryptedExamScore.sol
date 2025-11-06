@@ -28,6 +28,10 @@ contract EncryptedExamScore is SepoliaConfig {
     // Version control
     string public constant VERSION = "1.0.0";
 
+    // Emergency action approval (simple multi-sig concept)
+    mapping(bytes32 => uint256) public emergencyApprovals;
+    mapping(bytes32 => mapping(address => bool)) public hasApproved;
+
     // Events
     event ScoreSubmitted(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
     event ScoreUpdated(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
@@ -181,6 +185,32 @@ contract EncryptedExamScore is SepoliaConfig {
         address oldOwner = owner;
         owner = newOwner;
         emit OwnershipTransferred(oldOwner, newOwner, block.timestamp);
+    }
+
+    /// @notice Approve an emergency action (multi-sig concept)
+    /// @param actionId Unique identifier for the emergency action
+    function approveEmergencyAction(bytes32 actionId) external onlyOwner {
+        require(!hasApproved[actionId][msg.sender], "Already approved");
+
+        hasApproved[actionId][msg.sender] = true;
+        emergencyApprovals[actionId]++;
+
+        // Simple 2-out-of-2 approval for demo
+        if (emergencyApprovals[actionId] >= 2) {
+            // Execute emergency action (could be implemented based on actionId)
+            // For now, just pause the contract
+            if (!paused) {
+                paused = true;
+                emit Paused(msg.sender, block.timestamp);
+            }
+        }
+    }
+
+    /// @notice Check approval status for emergency action
+    /// @param actionId Unique identifier for the emergency action
+    /// @return Number of approvals received
+    function getEmergencyApprovalCount(bytes32 actionId) external view returns (uint256) {
+        return emergencyApprovals[actionId];
     }
 }
 
