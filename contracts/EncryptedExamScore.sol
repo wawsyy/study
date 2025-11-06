@@ -25,6 +25,9 @@ contract EncryptedExamScore is SepoliaConfig {
     // Emergency pause functionality
     bool public paused;
 
+    // Version control
+    string public constant VERSION = "1.0.0";
+
     // Events
     event ScoreSubmitted(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
     event ScoreUpdated(address indexed user, uint256 indexed scoreIndex, uint256 timestamp);
