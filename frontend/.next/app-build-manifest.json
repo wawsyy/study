@@ -1,0 +1,32 @@
+{
+  "pages": {
+    "/page": [
+      "static/chunks/frontend_9bd8068f._.css",
+      "static/chunks/9e883_ec59c2dd._.js",
+      "static/chunks/9e883_next_0094e878._.js",
+      "static/chunks/9e883_@wagmi_core_dist_esm_59204417._.js",
+      "static/chunks/9e883_viem__esm_7d974f0f._.js",
+      "static/chunks/9e883_@tanstack_query-core_build_modern_cae8cd39._.js",
+      "static/chunks/9e883_@rainbow-me_rainbowkit_dist_4b0f7d1f._.js",
+      "static/chunks/9e883_1e97dd00._.js",
+      "static/chunks/9e883_b6aded27._.js",
+      "static/chunks/9e883_ox__esm_5b7a1290._.js",
+      "static/chunks/9e883_b9e083af._.js",
+      "static/chunks/frontend_9b0352a5._.js",
+      "static/chunks/frontend_app_layout_tsx_c11d305c._.js",
+      "static/chunks/9e883_next_dist_client_components_builtin_global-error_b3d5f6c0.js",
+      "static/chunks/frontend_components_ExamScoreDemo_tsx_3ffaf242._.js",
+      "static/chunks/frontend_91949d91._.js",
+      "static/chunks/frontend_app_page_tsx_b3d5f6c0._.js",
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_51deae60._.js",
+      "static/chunks/9e883_next_dist_compiled_react-dom_33d456f8._.js",
+      "static/chunks/9e883_next_dist_compiled_next-devtools_index_e18dabda.js",
+      "static/chunks/9e883_next_dist_compiled_649610a4._.js",
+      "static/chunks/9e883_next_dist_client_af6cb9d5._.js",
+      "static/chunks/9e883_next_dist_0e511d54._.js",
+      "static/chunks/9e883_@swc_helpers_cjs_652634af._.js",
+      "static/chunks/frontend_a0ff3932._.js",
+      "static/chunks/turbopack-frontend_a50d7e93._.js"
+    ]
+  }
+}

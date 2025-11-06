@@ -1,0 +1,16 @@
+{
+  "framework": "nextjs",
+  "rootDirectory": "frontend",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        }
+      ]
+    }
+  ]
+}
+
