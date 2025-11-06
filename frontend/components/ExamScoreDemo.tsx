@@ -95,7 +95,7 @@ export const ExamScoreDemo = () => {
   };
 
   return (
-    <div className="grid w-full gap-6 max-w-4xl mx-auto">
+    <div className="grid w-full gap-4 md:gap-6 max-w-4xl mx-auto px-4 md:px-6">
       {/* Header */}
       <div className={cardClass}>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -109,7 +109,7 @@ export const ExamScoreDemo = () => {
       {/* Submit Score Section */}
       <div className={cardClass}>
         <h2 className="text-xl font-bold text-gray-800 mb-4">Submit New Score</h2>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <input
             type="number"
             min="0"
@@ -121,7 +121,7 @@ export const ExamScoreDemo = () => {
             disabled={!examScore.canSubmit || examScore.isSubmitting}
           />
           <button
-            className={buttonClass}
+            className={buttonClass + " w-full sm:w-auto sm:flex-shrink-0"}
             disabled={!examScore.canSubmit || examScore.isSubmitting}
             onClick={handleSubmit}
           >
