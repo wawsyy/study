@@ -116,24 +116,49 @@ export const useEncryptedExamScore = (parameters: {
       thisEthersReadonlyProvider
     );
 
-    Promise.all([
-      contract.getMyScore(),
-      contract.getMyScoreCount(),
-    ])
-      .then(([encryptedScore, count]) => {
+    // First check scoreCount, then conditionally call getMyScore
+    contract.getMyScoreCount()
+      .then((count: bigint) => {
         if (
           thisEncryptedExamScoreAddress !== encryptedExamScoreRef.current?.address ||
           !sameChain.current(thisChainId)
         ) {
           setMessage("Ignore refresh");
+          isRefreshingRef.current = false;
+          setIsRefreshing(false);
           return;
         }
 
-        setScoreHandle(encryptedScore);
         setScoreCount(count);
-        setMessage("Score loaded");
+
+        // Only call getMyScore if count > 0 to avoid decoding uninitialized euint32
+        if (count > 0n) {
+          return contract.getMyScore()
+            .then((encryptedScore: string) => {
+              if (
+                thisEncryptedExamScoreAddress !== encryptedExamScoreRef.current?.address ||
+                !sameChain.current(thisChainId)
+              ) {
+                setMessage("Ignore refresh");
+                return;
+              }
+
+              setScoreHandle(encryptedScore);
+              setMessage("Score loaded");
+            })
+            .catch((e: any) => {
+              // If getMyScore fails, still keep the count but clear the handle
+              console.warn("[useEncryptedExamScore] Failed to get score:", e);
+              setScoreHandle(undefined);
+              setMessage("Score count loaded, but failed to load encrypted score");
+            });
+        } else {
+          // No score exists, clear the handle
+          setScoreHandle(undefined);
+          setMessage("No score found");
+        }
       })
-      .catch((e) => {
+      .catch((e: any) => {
         // Suppress network errors that don't affect functionality
         if (
           e instanceof TypeError &&

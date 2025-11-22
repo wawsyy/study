@@ -25,7 +25,6 @@ export const ExamScoreDemo = () => {
   const [scoreInput, setScoreInput] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5;
 
@@ -186,28 +185,6 @@ export const ExamScoreDemo = () => {
         </div>
       </div>
 
-      {/* Search Section */}
-      <div className={cardClass}>
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Search & Filter</h2>
-        <div className="flex gap-4">
-          <input
-            type="text"
-            placeholder="Search scores..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-3 rounded-lg border-2 border-purple-300 focus:border-purple-500 focus:outline-none text-lg"
-            aria-label="Search scores"
-          />
-          <button
-            className={buttonClass + " px-6"}
-            onClick={() => setSearchTerm("")}
-            disabled={!searchTerm}
-          >
-            Clear
-          </button>
-        </div>
-      </div>
-
       {/* Submit Score Section */}
       <div className={cardClass}>
         <h2 className="text-xl font-bold text-gray-800 mb-4">Submit New Score</h2>
@@ -256,7 +233,13 @@ export const ExamScoreDemo = () => {
           <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg" role="alert">
             <p className="text-sm text-yellow-800">
               {!fhevmInstance ? (
-                "Initializing FHEVM... Please wait."
+                fhevmStatus === "loading" ? (
+                  "Initializing FHEVM... Please wait. (This may take a moment)"
+                ) : fhevmError ? (
+                  `FHEVM initialization failed: ${fhevmError.message}. Relayer connection issues may prevent submission.`
+                ) : (
+                  "Initializing FHEVM... Please wait."
+                )
               ) : !ethersSigner ? (
                 "Please connect your wallet to submit scores."
               ) : !examScore.isDeployed ? (
@@ -297,26 +280,6 @@ export const ExamScoreDemo = () => {
         </div>
 
         <div className="flex gap-4">
-          <button
-            className={buttonClass + " flex-1"}
-            onClick={() => {
-              const data = {
-                scoreCount: examScore.scoreCount,
-                lastUpdated: new Date().toISOString(),
-                handle: examScore.handle
-              };
-              const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = 'exam-score-data.json';
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            disabled={!examScore.canGetScore}
-          >
-            Export Data
-          </button>
           <button
             className={buttonClass + " flex-1"}
             disabled={!examScore.canGetScore}
