@@ -225,7 +225,7 @@ export const ExamScoreDemo = () => {
                 ? "border-red-300 focus:border-red-500"
                 : "border-purple-300 focus:border-purple-500"
             }`}
-            disabled={!examScore.canSubmit || examScore.isSubmitting}
+            disabled={examScore.isSubmitting}
             aria-label="Exam score input"
             aria-describedby={inputError ? "score-error" : undefined}
             aria-invalid={!!inputError}
