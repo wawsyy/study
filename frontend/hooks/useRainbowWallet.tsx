@@ -44,9 +44,7 @@ export function useRainbowWallet() {
         // For other methods, use the walletClient
         return await walletClient.request(args as any);
       },
-      on: () => {},
-      removeListener: () => {},
-    };
+    } as ethers.Eip1193Provider;
 
     setProvider(eip1193Provider);
 
