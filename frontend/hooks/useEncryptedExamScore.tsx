@@ -132,7 +132,7 @@ export const useEncryptedExamScore = (parameters: {
         setScoreCount(count);
 
         // Only call getMyScore if count > 0 to avoid decoding uninitialized euint32
-        if (count > 0n) {
+        if (count > BigInt(0)) {
           return contract.getMyScore()
             .then((encryptedScore: string) => {
               if (
