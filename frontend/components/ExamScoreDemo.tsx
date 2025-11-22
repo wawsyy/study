@@ -344,7 +344,7 @@ export const ExamScoreDemo = () => {
           <button
             className={buttonClass + " px-4 py-2"}
             onClick={() => setCurrentPage(prev => prev + 1)}
-            disabled={currentPage >= Math.ceil((examScore.scoreCount || 0) / itemsPerPage)}
+            disabled={currentPage >= Math.ceil(Number(examScore.scoreCount || 0) / itemsPerPage)}
           >
             Next
           </button>
