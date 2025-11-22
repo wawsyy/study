@@ -88,7 +88,8 @@ export function ErrorHandler() {
 
     // Handle network errors from resource loading
     const handleError = (event: ErrorEvent) => {
-      const target = event.target as HTMLElement;
+      // Check if target has src property (HTMLImageElement, HTMLScriptElement, etc.)
+      const target = event.target as HTMLElement & { src?: string };
       
       // Suppress Coinbase and COEP-related resource errors
       if (
