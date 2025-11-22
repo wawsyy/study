@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFhevm } from "../fhevm/useFhevm";
 import { useInMemoryStorage } from "../hooks/useInMemoryStorage";
 import { useRainbowWallet } from "@/hooks/useRainbowWallet";
@@ -29,24 +29,6 @@ export const ExamScoreDemo = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5;
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Ctrl/Cmd + Enter to submit score
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && examScore.canSubmit && !examScore.isSubmitting) {
-        handleSubmit();
-      }
-      // Escape to clear input
-      if (e.key === 'Escape') {
-        setScoreInput("");
-        setErrorMessage("");
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyPress);
-    return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [examScore.canSubmit, examScore.isSubmitting]);
-
   const {
     instance: fhevmInstance,
     status: fhevmStatus,
@@ -68,6 +50,62 @@ export const ExamScoreDemo = () => {
     sameChain,
     sameSigner,
   });
+
+  // Define validateScore before handleSubmit
+  const validateScore = useCallback((value: string): string | null => {
+    if (!value.trim()) {
+      return "Score is required";
+    }
+
+    const score = parseInt(value);
+    if (isNaN(score)) {
+      return "Please enter a valid number";
+    }
+
+    if (score < 0 || score > 100) {
+      return "Score must be between 0 and 100";
+    }
+
+    return null;
+  }, []);
+
+  // Define handleSubmit before useEffect using useCallback
+  const handleSubmit = useCallback(() => {
+    setErrorMessage("");
+
+    const validationError = validateScore(scoreInput);
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
+    const score = parseInt(scoreInput);
+
+    try {
+      examScore.submitScore(score);
+      setScoreInput("");
+    } catch (error) {
+      setErrorMessage("Failed to submit score. Please try again.");
+    }
+  }, [scoreInput, examScore, validateScore]);
+
+  // Keyboard shortcuts (moved after examScore and handleSubmit definitions)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + Enter to submit score
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && examScore.canSubmit && !examScore.isSubmitting) {
+        handleSubmit();
+      }
+      // Escape to clear input
+      if (e.key === 'Escape') {
+        setScoreInput("");
+        setErrorMessage("");
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [examScore.canSubmit, examScore.isSubmitting, handleSubmit]);
 
   const buttonClass =
     "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-3 font-semibold text-white shadow-lg " +
@@ -99,44 +137,8 @@ export const ExamScoreDemo = () => {
     return errorNotDeployed(chainId);
   }
 
-  const validateScore = (value: string): string | null => {
-    if (!value.trim()) {
-      return "Score is required";
-    }
-
-    const score = parseInt(value);
-    if (isNaN(score)) {
-      return "Please enter a valid number";
-    }
-
-    if (score < 0 || score > 100) {
-      return "Score must be between 0 and 100";
-    }
-
-    return null;
-  };
-
   // Real-time validation (moved after validateScore definition)
   const inputError = scoreInput ? validateScore(scoreInput) : null;
-
-  const handleSubmit = () => {
-    setErrorMessage("");
-
-    const validationError = validateScore(scoreInput);
-    if (validationError) {
-      setErrorMessage(validationError);
-      return;
-    }
-
-    const score = parseInt(scoreInput);
-
-    try {
-      examScore.submitScore(score);
-      setScoreInput("");
-    } catch (error) {
-      setErrorMessage("Failed to submit score. Please try again.");
-    }
-  };
 
   return (
     <div className="grid w-full gap-4 md:gap-6 max-w-4xl mx-auto px-4 md:px-6">
