@@ -255,10 +255,17 @@ export const useEncryptedExamScore = (parameters: {
           return;
         }
 
-        setClearScore({ handle: thisScoreHandle, clear: res[thisScoreHandle] });
+        const decryptedValue = res[thisScoreHandle];
+        const clearValue: bigint = typeof decryptedValue === 'bigint' 
+          ? decryptedValue 
+          : typeof decryptedValue === 'string' 
+            ? BigInt(decryptedValue) 
+            : BigInt(Number(decryptedValue));
+        
+        setClearScore({ handle: thisScoreHandle, clear: clearValue });
         clearScoreRef.current = {
           handle: thisScoreHandle,
-          clear: res[thisScoreHandle],
+          clear: clearValue,
         };
 
         setMessage("Score decrypted: " + clearScoreRef.current.clear);
