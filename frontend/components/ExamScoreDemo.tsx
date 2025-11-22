@@ -252,6 +252,21 @@ export const ExamScoreDemo = () => {
         {examScore.isSubmitting && (
           <p className="mt-2 text-sm text-purple-600">{examScore.message}</p>
         )}
+        {!examScore.canSubmit && !examScore.isSubmitting && (
+          <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg" role="alert">
+            <p className="text-sm text-yellow-800">
+              {!fhevmInstance ? (
+                "Initializing FHEVM... Please wait."
+              ) : !ethersSigner ? (
+                "Please connect your wallet to submit scores."
+              ) : !examScore.isDeployed ? (
+                "Contract not deployed on this network. Please switch to Sepolia or local Hardhat network."
+              ) : (
+                "Preparing submission... Please wait."
+              )}
+            </p>
+          </div>
+        )}
         {errorMessage && (
           <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg" role="alert" id="score-error">
             <p className="text-sm text-red-800">{errorMessage}</p>
