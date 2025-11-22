@@ -35,18 +35,28 @@ if (!fs.existsSync(outdir)) {
 const deploymentsDir = path.join(dir, "deployments");
 
 function deployOnHardhatNode() {
+  // Skip deployment in CI/CD environments (like Vercel)
+  if (process.env.CI || process.env.VERCEL || process.env.VERCEL_ENV) {
+    return false;
+  }
   if (process.platform === "win32") {
     // Not supported on Windows
-    return;
+    return false;
+  }
+  const deployScriptPath = path.join(path.resolve("./scripts"), "deploy-hardhat-node.sh");
+  if (!fs.existsSync(deployScriptPath)) {
+    // Script doesn't exist, skip deployment
+    return false;
   }
   try {
     execSync(`./deploy-hardhat-node.sh`, {
       cwd: path.resolve("./scripts"),
       stdio: "inherit",
     });
+    return true;
   } catch (e) {
     console.error(`${line}Script execution failed: ${e}${line}`);
-    process.exit(1);
+    return false;
   }
 }
 
@@ -55,7 +65,16 @@ function readDeployment(chainName, chainId, contractName, optional) {
 
   if (!fs.existsSync(chainDeploymentDir) && chainId === 31337) {
     // Try to auto-deploy the contract on hardhat node!
-    deployOnHardhatNode();
+    // Skip if in CI/CD environment or script doesn't exist
+    const deployed = deployOnHardhatNode();
+    if (!deployed && !optional) {
+      // If deployment failed and it's not optional, check for existing ABI files
+      const existingABIPath = path.join(outdir, `${CONTRACT_NAME}ABI.ts`);
+      if (fs.existsSync(existingABIPath)) {
+        console.log(`${line}Deployment failed, but existing ABI files found. Using existing files.${line}`);
+        return undefined; // Will be handled by the fallback logic below
+      }
+    }
   }
 
   if (!fs.existsSync(chainDeploymentDir)) {
@@ -95,6 +114,18 @@ if (!deployLocalhost || !deploySepolia) {
     console.log(`${line}Deployment files not found, but existing ABI files found. Skipping generation.${line}`);
     process.exit(0);
   } else {
+    // In CI/CD environments, this is acceptable if ABI files are committed
+    if (process.env.CI || process.env.VERCEL || process.env.VERCEL_ENV) {
+      console.warn(
+        `${line}Warning: Deployment files not found in CI/CD environment.${line}` +
+        `${line}Please ensure frontend/abi/ directory is committed to the repository.${line}`
+      );
+      // Don't fail the build, let it continue - ABI files should be committed
+      if (fs.existsSync(existingABIPath)) {
+        console.log(`${line}Found existing ABI file, continuing build...${line}`);
+        process.exit(0);
+      }
+    }
     console.error(
       `${line}Deployment files not found and no existing ABI files. Please ensure deployments directory exists or ABI files are committed.${line}`
     );
