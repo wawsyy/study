@@ -29,9 +29,6 @@ export const ExamScoreDemo = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5;
 
-  // Real-time validation
-  const inputError = scoreInput ? validateScore(scoreInput) : null;
-
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -118,6 +115,9 @@ export const ExamScoreDemo = () => {
 
     return null;
   };
+
+  // Real-time validation (moved after validateScore definition)
+  const inputError = scoreInput ? validateScore(scoreInput) : null;
 
   const handleSubmit = () => {
     setErrorMessage("");
